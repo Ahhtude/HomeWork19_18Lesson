@@ -1,5 +1,7 @@
+import com.sun.org.apache.xml.internal.res.XMLErrorResources_tr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -26,57 +28,45 @@ public class DomParserDemo {
 
         Element rootElement = document.getDocumentElement();
         List<Event> list = printXML(rootElement.getChildNodes());
-        System.out.println(list.size());
-        for (int i = 0; i < list.size(); i++) {
 
-            System.out.println(list.get(i).getEvent_id());
-            System.out.println(list.get(i).getEvent_date());
-            System.out.println(list.get(i).getParameter().getPriority());
-            System.out.println(list.get(i).getParameter().getLog_level());
-            System.out.println(list.get(i).getParameter().getSource());
-            System.out.println();
+        for (int i=0; i<list.size();i++){
+            System.out.println(list.get(i).getEvent_id()+ " " + list.get(i).getEvent_date()
+                    + " " + list.get(i).getParameter().getPriority() + " " + list.get(i).getParameter().getLog_level()
+            + " " + list.get(i).getParameter().getSource());
         }
 
-
-    }
+        }
 
     public static List<Event> printXML(NodeList childs) {
         List<Event> listEvents = new ArrayList<>(5);
-        List<EventParameter> parameters = new ArrayList<>();
-
-
-        NodeList events = document.getElementsByTagName("event");
-        for (int i = 0; i < events.getLength(); i++) {
+        for (int i=0;i<5;i++){
             listEvents.add(new Event());
-            parameters.add(new EventParameter());
+            listEvents.get(i).setParameter(new EventParameter());
         }
 
-        NodeList event_date_list = document.getElementsByTagName("event_date");
-        for (int i = 0; i < event_date_list.getLength(); i++) {
-            listEvents.get(i).setEvent_date(event_date_list.item(i).getTextContent());
-        }
+        int index =0;
+        for (int i =0; i<childs.getLength(); i++){
+            Node node = childs.item(i);
+            if (node instanceof Element && node.getNodeName().equals("event")) {
+                Element element = (Element) node;
+                NodeList nodeList = element.getElementsByTagName("event_id");
+                listEvents.get(index).setEvent_id(nodeList.item(0).getTextContent());
 
-        NodeList event_id_list = document.getElementsByTagName("event_id");
-        for (int i = 0; i < event_id_list.getLength(); i++) {
-            listEvents.get(i).setEvent_id(event_id_list.item(i).getTextContent());
-        }
+                nodeList = element.getElementsByTagName("event_date");
+                listEvents.get(index).setEvent_date(nodeList.item(0).getTextContent());
 
-        NodeList log_levelList = document.getElementsByTagName("log_level");
-        for (int i = 0; i < log_levelList.getLength(); i++) {
-            parameters.get(i).setLog_level(log_levelList.item(i).getTextContent());
-        }
+                nodeList = element.getElementsByTagName("priority");
+                listEvents.get(index).getParameter().setPriority(Integer.parseInt(nodeList.item(0).getTextContent()));
 
-        NodeList priorityList = document.getElementsByTagName("priority");
-        for (int i = 0; i < priorityList.getLength(); i++) {
-            parameters.get(i).setPriority(Integer.parseInt(priorityList.item(i).getTextContent()));
-        }
+                nodeList = element.getElementsByTagName("log_level");
+                listEvents.get(index).getParameter().setLog_level(nodeList.item(0).getTextContent());
 
-        NodeList sourceList = document.getElementsByTagName("source");
-        for (int i = 0; i < sourceList.getLength(); i++) {
-            parameters.get(i).setSource(sourceList.item(i).getTextContent());
-            listEvents.get(i).setParameter(parameters.get(i));
-        }
+                nodeList = element.getElementsByTagName("source");
+                listEvents.get(index++).getParameter().setSource(nodeList.item(0).getTextContent());
+            }
 
+
+        }
         return listEvents;
     }
 }
